@@ -4,102 +4,136 @@ import { ThemedText } from './ThemedText';
 import { ThemedView } from './ThemedView';
 
 const mockData = [
-  { english: "I haven't hear that.", japanese: "聞いたことなかった。" },
-  { english: "I preferred hers over mine.", japanese: "私のより彼女の(ラーメン)の方が好みだった。" },
-  { english: "I don't usually eat it that much.", japanese: "それは(普段)そんなに食べないなあ。" },
-  { english: "I'm not really a fan of daikon.", japanese: "あんまりダイコンが好きじゃないんだよね。" },
-  { english: "Konjac is just okay for me.", japanese: "こんにゃくは普通かな。" },
-  { english: "Changing the subject,", japanese: "話が変わるんだけど、" },
-  { english: "I haven't decided what to see or visit yet.", japanese: "どこ行くかまだ決めてないんだよね。" },
-  { english: "Out of what you said,", japanese: "あなたが言った中なら、" },
-  { english: "Do I need to pay a fee to enter it?", japanese: "そこに入るのに入場料はかかる？" },
-  { english: "What's ~ like?", japanese: "〜ってどんな感じなん？" },
-  { english: "That sounds very interesting for me.", japanese: "面白そうやな。" },
-  { english: "I kind of understand.", japanese: "何となく分かった気がする" },
-  { english: "I want you to give me a quiz to improve my listening skills.", japanese: "英語力を高めるためにクイズを出してほしい" },
-  { english: "That's enough for today.", japanese: "今日はこれで十分かな。" },
-  { english: "Thank you for spending time with me.", japanese: "付き合ってくれてありがとう。" },
-  { english: "I ended up doing it until 10:00.", japanese: "結局10時までやっちゃったよ。" }
+	{ english: "I haven't hear that.", japanese: "聞いたことなかった。" },
+	{ english: "I preferred hers over mine.", japanese: "私のより彼女の(ラーメン)の方が好みだった。" },
+	{ english: "I don't usually eat it that much.", japanese: "それは(普段)そんなに食べないなあ。" },
+	{ english: "I'm not really a fan of daikon.", japanese: "あんまりダイコンが好きじゃないんだよね。" },
+	{ english: "Konjac is just okay for me.", japanese: "こんにゃくは普通かな。" },
+	{ english: "Changing the subject,", japanese: "話が変わるんだけど、" },
+	{ english: "I haven't decided what to see or visit yet.", japanese: "どこ行くかまだ決めてないんだよね。" },
+	{ english: "Out of what you said,", japanese: "あなたが言った中なら、" },
+	{ english: "Do I need to pay a fee to enter it?", japanese: "そこに入るのに入場料はかかる？" },
+	{ english: "What's ~ like?", japanese: "〜ってどんな感じなん？" },
+	{ english: "That sounds very interesting for me.", japanese: "面白そうやな。" },
+	{ english: "I kind of understand.", japanese: "何となく分かった気がする" },
+	{ english: "I want you to give me a quiz to improve my listening skills.", japanese: "英語力を高めるためにクイズを出してほしい。" },
+	{ english: "That's enough for today.", japanese: "今日はこれで十分かな。" },
+	{ english: "Thank you for spending time with me.", japanese: "付き合ってくれてありがとう。" },
+	{ english: "I ended up doing it until 10:00.", japanese: "結局10時までやっちゃったよ。" }
 ];
 
 export function RandomPhrase({ onUpdate }: { onUpdate: boolean }) {
-  const [phrase, setPhrase] = useState(mockData[0]);
-  const [showEnglish, setShowEnglish] = useState(false);
+	const [phrase, setPhrase] = useState(mockData[0]);
+	const [showEnglish, setShowEnglish] = useState(false);
 
-  useEffect(() => {
-    const currentIndex = mockData.indexOf(phrase);
-    const nextIndex = (currentIndex + 1) % mockData.length;
-    setPhrase(mockData[nextIndex]);
-    setShowEnglish(false);
-  }, [onUpdate]);
+	useEffect(() => {
+		const currentIndex = mockData.indexOf(phrase);
+		const nextIndex = (currentIndex + 1) % mockData.length;
+		setPhrase(mockData[nextIndex]);
+		setShowEnglish(false);
+	}, [onUpdate]);
 
-  return (
-    <ThemedView style={styles.container}>
-      <ThemedView style={styles.phraseContainer}>
-        <ThemedText type="title" style={styles.japanese}>
-          {phrase.japanese}
-        </ThemedText>
-        <ThemedView style={styles.englishContainer}>
-          {showEnglish ? (
-            <ThemedText type="title" style={styles.english}>
-              {phrase.english}
-            </ThemedText>
-          ) : (
-            <ThemedView style={styles.placeholder} />
-          )}
-        </ThemedView>
-      </ThemedView>
+	return (
+		<ThemedView style={styles.container}>
+			<ThemedView style={styles.card}>
+				<ThemedView style={styles.contentContainer}>
+					<ThemedView style={styles.phraseContainer}>
+						<ThemedText type="title" style={styles.japanese}>
+							{phrase.japanese}
+						</ThemedText>
+						<ThemedView style={styles.englishContainer}>
+							{showEnglish ? (
+								<ThemedText type="title" style={styles.english}>
+									{phrase.english}
+								</ThemedText>
+							) : (
+								<ThemedView style={styles.placeholder} />
+							)}
+						</ThemedView>
+					</ThemedView>
 
-      <Pressable 
-        onPress={(e) => {
-          e.stopPropagation();
-          setShowEnglish(!showEnglish);
-        }}
-        style={({ pressed }) => [
-          styles.button,
-          pressed && styles.buttonPressed
-        ]}
-      >
-        <ThemedText>
-          {showEnglish ? "Hide English" : "Show English"}
-        </ThemedText>
-      </Pressable>
-    </ThemedView>
-  );
+					<Pressable
+						onPress={(e) => {
+							e.stopPropagation();
+							setShowEnglish(!showEnglish);
+						}}
+						style={({ pressed }) => [
+							styles.button,
+							pressed && styles.buttonPressed
+						]}
+					>
+						<ThemedText>
+							{showEnglish ? "英語を非表示" : "英語を表示"}
+						</ThemedText>
+					</Pressable>
+				</ThemedView>
+			</ThemedView>
+		</ThemedView>
+	);
 }
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    gap: 24,
-  },
-  phraseContainer: {
-    minHeight: 120,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  englishContainer: {
-    height: 40,
-    justifyContent: 'center',
-    marginTop: 8,
-  },
-  placeholder: {
-    height: 40,
-  },
-  japanese: {
-    fontSize: 24,
-  },
-  english: {
-    fontSize: 20,
-  },
-  button: {
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: '#A1CEDC',
-    minWidth: 120,
-    alignItems: 'center',
-  },
-  buttonPressed: {
-    opacity: 0.7,
-  }
+	container: {
+		alignItems: 'center',
+		padding: 16,
+		width: '100%',
+	},
+	card: {
+		backgroundColor: '#FFFFFF',
+		borderRadius: 16,
+		width: '100%',
+		maxWidth: 550,
+		height: 280,
+		shadowColor: '#000',
+		shadowOffset: {
+			width: 0,
+			height: 2,
+		},
+		shadowOpacity: 0.1,
+		shadowRadius: 8,
+		elevation: 3,
+		borderWidth: 1,
+		borderColor: 'rgba(0, 0, 0, 0.1)',
+	},
+	contentContainer: {
+		padding: 24,
+		flex: 1,
+		justifyContent: 'space-between',
+	},
+	phraseContainer: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+		paddingVertical: 16,
+	},
+	englishContainer: {
+		minHeight: 48,
+		justifyContent: 'center',
+		alignItems: 'center',
+		marginTop: 16,
+	},
+	placeholder: {
+		height: 48,
+	},
+	japanese: {
+		fontSize: 20,
+		textAlign: 'center',
+		paddingHorizontal: 16,
+	},
+	english: {
+		fontSize: 20,
+		textAlign: 'center',
+		paddingHorizontal: 16,
+	},
+	button: {
+		padding: 12,
+		borderRadius: 8,
+		backgroundColor: '#A1CEDC',
+		alignItems: 'center',
+		alignSelf: 'center',
+		minWidth: 120,
+	},
+	buttonPressed: {
+		opacity: 0.7,
+	}
 }); 
