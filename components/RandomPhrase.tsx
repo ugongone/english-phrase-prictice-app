@@ -22,7 +22,11 @@ const mockData = [
 	{ english: "I ended up doing it until 10:00.", japanese: "結局10時までやっちゃったよ。" }
 ];
 
-export function RandomPhrase({ onUpdate }: { onUpdate: boolean }) {
+interface RandomPhraseProps {
+	onUpdate: number;
+}
+
+export function RandomPhrase({ onUpdate }: RandomPhraseProps) {
 	const [phrase, setPhrase] = useState(mockData[0]);
 	const [showEnglish, setShowEnglish] = useState(false);
 
@@ -75,9 +79,7 @@ export function RandomPhrase({ onUpdate }: { onUpdate: boolean }) {
 const styles = StyleSheet.create({
 	container: {
 		alignItems: 'center',
-		padding: 16,
 		width: '100%',
-		backgroundColor: '#F5F5F5',
 	},
 	card: {
 		backgroundColor: '#FFFFFF',
