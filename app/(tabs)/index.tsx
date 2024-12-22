@@ -6,14 +6,20 @@ import { ThemedView } from '@/components/ThemedView';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 
 export default function HomeScreen() {
-  const [currentPhrase, setCurrentPhrase] = useState(0);
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
+  const prevSlideAnim = useRef(new Animated.Value(-350)).current;
   const currentSlideAnim = useRef(new Animated.Value(0)).current;
-  const nextSlideAnim = useRef(new Animated.Value(400)).current;
+  const nextSlideAnim = useRef(new Animated.Value(350)).current;
 
   const swipeGesture = Gesture.Pan()
     .onEnd((event) => {
       if (event.velocityX < -50) {
         Animated.parallel([
+          Animated.timing(prevSlideAnim, {
+            toValue: 350,
+            duration: 300,
+            useNativeDriver: true,
+          }),
           Animated.timing(currentSlideAnim, {
             toValue: -400,
             duration: 300,
@@ -25,9 +31,10 @@ export default function HomeScreen() {
             useNativeDriver: true,
           })
         ]).start(() => {
-          setCurrentPhrase(prev => prev + 1);
+          setCurrentPhraseIndex(prev => prev + 1);
+          prevSlideAnim.setValue(-350);
           currentSlideAnim.setValue(0);
-          nextSlideAnim.setValue(400);
+          nextSlideAnim.setValue(350);
         });
       }
     });
@@ -48,10 +55,20 @@ export default function HomeScreen() {
               styles.cardContainer,
               {
                 position: 'absolute',
+                transform: [{ translateX: prevSlideAnim }]
+              }
+            ]}>
+              <RandomPhrase phraseIndex={currentPhraseIndex} />
+            </Animated.View>
+
+            <Animated.View style={[
+              styles.cardContainer,
+              {
+                position: 'absolute',
                 transform: [{ translateX: currentSlideAnim }]
               }
             ]}>
-              <RandomPhrase onUpdate={currentPhrase} />
+              <RandomPhrase phraseIndex={currentPhraseIndex} />
             </Animated.View>
 
             <Animated.View style={[
@@ -61,7 +78,7 @@ export default function HomeScreen() {
                 transform: [{ translateX: nextSlideAnim }]
               }
             ]}>
-              <RandomPhrase onUpdate={currentPhrase + 1} />
+              <RandomPhrase phraseIndex={currentPhraseIndex + 1} />
             </Animated.View>
           </ThemedView>
         </ParallaxScrollView>
@@ -82,7 +99,8 @@ const styles = StyleSheet.create({
     minHeight: 400,
   },
   cardContainer: {
-    width: '100%',
+    width: '90%',
+    maxWidth: 400,
     alignItems: 'center',
     transform: [{ translateY: -180 }],
   }

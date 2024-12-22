@@ -23,19 +23,16 @@ const mockData = [
 ];
 
 interface RandomPhraseProps {
-	onUpdate: number;
+	phraseIndex: number;
 }
 
-export function RandomPhrase({ onUpdate }: RandomPhraseProps) {
-	const [phrase, setPhrase] = useState(mockData[0]);
+export function RandomPhrase({ phraseIndex }: RandomPhraseProps) {
 	const [showEnglish, setShowEnglish] = useState(false);
+	const phrase = mockData[phraseIndex % mockData.length];
 
 	useEffect(() => {
-		const currentIndex = mockData.indexOf(phrase);
-		const nextIndex = (currentIndex + 1) % mockData.length;
-		setPhrase(mockData[nextIndex]);
 		setShowEnglish(false);
-	}, [onUpdate]);
+	}, [phraseIndex]);
 
 	return (
 		<ThemedView style={styles.container}>
