@@ -3,32 +3,31 @@ import { StyleSheet, Pressable } from 'react-native';
 import { ThemedText } from './ThemedText';
 import { ThemedView } from './ThemedView';
 
-const mockData = [
-	{ english: "I haven't hear that.", japanese: "聞いたことなかった。" },
-	{ english: "I preferred hers over mine.", japanese: "私のより彼女の(ラーメン)の方が好みだった。" },
-	{ english: "I don't usually eat it that much.", japanese: "それは(普段)そんなに食べないなあ。" },
-	{ english: "I'm not really a fan of daikon.", japanese: "あんまりダイコンが好きじゃないんだよね。" },
-	{ english: "Konjac is just okay for me.", japanese: "こんにゃくは普通かな。" },
-	{ english: "Changing the subject,", japanese: "話が変わるんだけど、" },
-	{ english: "I haven't decided what to see or visit yet.", japanese: "どこ行くかまだ決めてないんだよね。" },
-	{ english: "Out of what you said,", japanese: "あなたが言った中なら、" },
-	{ english: "Do I need to pay a fee to enter it?", japanese: "そこに入るのに入場料はかかる？" },
-	{ english: "What's ~ like?", japanese: "〜ってどんな感じなん？" },
-	{ english: "That sounds very interesting for me.", japanese: "面白そうやな。" },
-	{ english: "I kind of understand.", japanese: "何となく分かった気がする" },
-	{ english: "I want you to give me a quiz to improve my listening skills.", japanese: "英語力を高めるためにクイズを出してほしい。" },
-	{ english: "That's enough for today.", japanese: "今日はこれで十分かな。" },
-	{ english: "Thank you for spending time with me.", japanese: "付き合ってくれてありがとう。" },
-	{ english: "I ended up doing it until 10:00.", japanese: "結局10時までやっちゃったよ。" }
-];
+interface Phrase {
+	id: string;
+	english: string;
+	japanese: string;
+	date: string;
+}
 
 interface RandomPhraseProps {
 	phraseIndex: number;
 }
 
 export function RandomPhrase({ phraseIndex }: RandomPhraseProps) {
+	const [mockData, setMockData ] = useState<Phrase[]>([]);
 	const [showEnglish, setShowEnglish] = useState(false);
-	const phrase = mockData[phraseIndex % mockData.length];
+
+	useEffect(() => {
+		fetch('https://english-phrase-practice-app-be.vercel.app/api/notion/getData')
+			.then(response => response.json())
+			.then(jsonData => setMockData(jsonData.data))
+			.catch(error => console.error('Error fetching phrases:', error));
+	}, []);
+	
+	const phrase = mockData.length > 0 
+	? mockData[phraseIndex % mockData.length] 
+	: { id: '', english: '', japanese: '', date: '' };
 
 	useEffect(() => {
 		setShowEnglish(false);
