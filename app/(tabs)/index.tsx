@@ -1,4 +1,4 @@
-import { StyleSheet, Animated } from 'react-native';
+import { StyleSheet, Animated, Dimensions } from 'react-native';
 import { useState, useRef, useEffect } from 'react';
 import { RandomPhrase } from '@/components/RandomPhrase';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -15,9 +15,6 @@ interface Phrase {
 export default function HomeScreen() {
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
   const [phrases, setPhrases] = useState<Phrase[]>([]);
-  const prevSlideAnim = useRef(new Animated.Value(-350)).current;
-  const currentSlideAnim = useRef(new Animated.Value(0)).current;
-  const nextSlideAnim = useRef(new Animated.Value(350)).current;
 
   // シャッフル関数
   const shuffleArray = <T,>(array: T[]): T[] => {
@@ -42,20 +39,35 @@ export default function HomeScreen() {
       .catch(error => console.error('Error fetching phrases:', error));
   }, []);
 
+  // 画面の横幅を取得
+  const screenWidth = Dimensions.get('window').width;
+  // カードの横幅を計算
+  const cardWidth = screenWidth * 0.9;
+  // 画面端からのカードのはみ出し量(20px)
+  const peekWidth = 20;
+
+  // カードの位置を初期化
+  const prevSlideAnim = useRef(new Animated.Value(-cardWidth + peekWidth)).current;
+  const currentSlideAnim = useRef(new Animated.Value(0)).current;
+  const nextSlideAnim = useRef(new Animated.Value(cardWidth - peekWidth)).current;
+
   const swipeGesture = Gesture.Pan()
     .onEnd((event) => {
       if (event.velocityX < -50) {
         Animated.parallel([
+          // 前のカードはさらに左に移動して画面外に
           Animated.timing(prevSlideAnim, {
-            toValue: 350,
+            toValue: -cardWidth * 2,
             duration: 300,
             useNativeDriver: true,
           }),
+          // 現在のカードは左に移動
           Animated.timing(currentSlideAnim, {
-            toValue: -400,
+            toValue: -cardWidth + peekWidth,
             duration: 300,
             useNativeDriver: true,
           }),
+          // 次のカードは中央に移動
           Animated.timing(nextSlideAnim, {
             toValue: 0,
             duration: 300,
@@ -63,9 +75,9 @@ export default function HomeScreen() {
           })
         ]).start(() => {
           setCurrentPhraseIndex(prev => prev + 1);
-          prevSlideAnim.setValue(-350);
+          prevSlideAnim.setValue(-cardWidth + peekWidth);
           currentSlideAnim.setValue(0);
-          nextSlideAnim.setValue(350);
+          nextSlideAnim.setValue(cardWidth - peekWidth);
         });
       }
     });
