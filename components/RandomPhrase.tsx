@@ -3,6 +3,7 @@ import { StyleSheet, Pressable, Image } from 'react-native';
 import { ThemedText } from './ThemedText';
 import { ThemedView } from './ThemedView';
 import { Audio } from 'expo-av';
+import Constants from 'expo-constants';
 
 interface Phrase {
 	id: string;
@@ -19,9 +20,10 @@ export function RandomPhrase({ phraseIndex }: RandomPhraseProps) {
 	const [mockData, setMockData ] = useState<Phrase[]>([]);
 	const [showEnglish, setShowEnglish] = useState(false);
 	const [sound, setSound] = useState<Audio.Sound | null>(null);
-
+	const apiUrl = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000';
+	
 	useEffect(() => {
-		fetch('https://english-phrase-practice-app-be.vercel.app/api/notion/getData')
+		fetch(`${apiUrl}/api/notion/getData`)
 			.then(response => response.json())
 			.then(jsonData => setMockData(jsonData.data))
 			.catch(error => console.error('Error fetching phrases:', error));
@@ -41,7 +43,7 @@ export function RandomPhrase({ phraseIndex }: RandomPhraseProps) {
 				await sound.unloadAsync();
 			}
 
-			const response = await fetch('http://localhost:3000/api/openai/getVoiceData', {
+			const response = await fetch(`${apiUrl}/api/openai/getVoiceData`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
