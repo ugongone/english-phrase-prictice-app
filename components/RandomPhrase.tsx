@@ -3,7 +3,6 @@ import { StyleSheet, Pressable, Image } from 'react-native';
 import { ThemedText } from './ThemedText';
 import { ThemedView } from './ThemedView';
 import { Audio } from 'expo-av';
-import Constants from 'expo-constants';
 
 interface Phrase {
 	id: string;
@@ -14,26 +13,17 @@ interface Phrase {
 
 interface RandomPhraseProps {
 	phraseIndex: number;
+	phrases: Phrase[];
 }
 
-export function RandomPhrase({ phraseIndex }: RandomPhraseProps) {
-	const [mockData, setMockData ] = useState<Phrase[]>([]);
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
+export function RandomPhrase({ phraseIndex, phrases }: RandomPhraseProps) {
 	const [showEnglish, setShowEnglish] = useState(false);
 	const [sound, setSound] = useState<Audio.Sound | null>(null);
-	const apiUrl = process.env.EXPO_PUBLIC_API_URL;
-	if (!apiUrl) {
-		throw new Error('API_URL is not set');
-	}
 	
-	useEffect(() => {
-		fetch(`${apiUrl}/api/notion/getData`)
-			.then(response => response.json())
-			.then(jsonData => setMockData(jsonData.data))
-			.catch(error => console.error('Error fetching phrases:', error));
-	}, []);
-	
-	const phrase = mockData.length > 0 
-	? mockData[phraseIndex % mockData.length] 
+	const phrase = phrases.length > 0 
+	? phrases[phraseIndex % phrases.length] 
 	: { id: '', english: '', japanese: '', date: '' };
 
 	useEffect(() => {

@@ -1,15 +1,46 @@
 import { StyleSheet, Animated } from 'react-native';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { RandomPhrase } from '@/components/RandomPhrase';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedView } from '@/components/ThemedView';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 
+interface Phrase {
+  id: string;
+  english: string;
+  japanese: string;
+  date: string;
+}
+
 export default function HomeScreen() {
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
+  const [phrases, setPhrases] = useState<Phrase[]>([]);
   const prevSlideAnim = useRef(new Animated.Value(-350)).current;
   const currentSlideAnim = useRef(new Animated.Value(0)).current;
   const nextSlideAnim = useRef(new Animated.Value(350)).current;
+
+  // シャッフル関数
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // データフェッチを親コンポーネントで1回だけ実行
+  useEffect(() => {
+    const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+    if (!apiUrl) {
+      throw new Error('API_URL is not set');
+    }
+
+    fetch(`${apiUrl}/api/notion/getData`)
+      .then(response => response.json())
+      .then(jsonData => setPhrases(shuffleArray(jsonData.data)))
+      .catch(error => console.error('Error fetching phrases:', error));
+  }, []);
 
   const swipeGesture = Gesture.Pan()
     .onEnd((event) => {
@@ -41,7 +72,7 @@ export default function HomeScreen() {
 
   return (
     <GestureDetector gesture={swipeGesture}>
-      <ThemedView 
+      <ThemedView
         style={styles.pressable}
         lightColor="#F5F5F5"
         darkColor="#F5F5F5">
@@ -58,7 +89,7 @@ export default function HomeScreen() {
                 transform: [{ translateX: prevSlideAnim }]
               }
             ]}>
-              <RandomPhrase phraseIndex={currentPhraseIndex} />
+              <RandomPhrase phraseIndex={currentPhraseIndex} phrases={phrases} />
             </Animated.View>
 
             <Animated.View style={[
@@ -68,7 +99,7 @@ export default function HomeScreen() {
                 transform: [{ translateX: currentSlideAnim }]
               }
             ]}>
-              <RandomPhrase phraseIndex={currentPhraseIndex} />
+              <RandomPhrase phraseIndex={currentPhraseIndex} phrases={phrases} />
             </Animated.View>
 
             <Animated.View style={[
@@ -78,7 +109,7 @@ export default function HomeScreen() {
                 transform: [{ translateX: nextSlideAnim }]
               }
             ]}>
-              <RandomPhrase phraseIndex={currentPhraseIndex + 1} />
+              <RandomPhrase phraseIndex={currentPhraseIndex + 1} phrases={phrases} />
             </Animated.View>
           </ThemedView>
         </ParallaxScrollView>
