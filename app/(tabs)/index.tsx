@@ -1,5 +1,5 @@
 import { StyleSheet, Animated, Dimensions } from 'react-native';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { RandomPhrase } from '@/components/RandomPhrase';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedView } from '@/components/ThemedView';
@@ -43,13 +43,20 @@ export default function HomeScreen() {
   const screenWidth = Dimensions.get('window').width;
   // カードの横幅を計算
   const cardWidth = screenWidth * 0.9;
-  // 画面端からのカードのはみ出し量(20px)
-  const peekWidth = 20;
+  // 画面端からのカードのはみ出し量(30px)
+  const peekWidth = 30;
 
   // カードの位置を初期化
   const prevSlideAnim = useRef(new Animated.Value(-cardWidth + peekWidth)).current;
   const currentSlideAnim = useRef(new Animated.Value(0)).current;
   const nextSlideAnim = useRef(new Animated.Value(cardWidth - peekWidth)).current;
+
+  // 初期位置を確実に設定するために、cardWidthとpeekWidthに値が入ってから各位置を更新
+  useLayoutEffect(() => {
+    prevSlideAnim.setValue(-cardWidth + peekWidth);
+    currentSlideAnim.setValue(0);
+    nextSlideAnim.setValue(cardWidth - peekWidth);
+  }, [cardWidth, peekWidth]);
 
   const swipeGesture = Gesture.Pan()
     .onEnd((event) => {
