@@ -20,8 +20,10 @@ export function RandomPhrase({ phraseIndex }: RandomPhraseProps) {
 	const [mockData, setMockData ] = useState<Phrase[]>([]);
 	const [showEnglish, setShowEnglish] = useState(false);
 	const [sound, setSound] = useState<Audio.Sound | null>(null);
-	// const apiUrl = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000';
-	const apiUrl = 'https://english-phrase-practice-app-be.vercel.app';
+	const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+	if (!apiUrl) {
+		throw new Error('API_URL is not set');
+	}
 	
 	useEffect(() => {
 		fetch(`${apiUrl}/api/notion/getData`)
