@@ -15,6 +15,9 @@ interface Phrase {
 export default function HomeScreen() {
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
   const [phrases, setPhrases] = useState<Phrase[]>([]);
+  // SSR判定
+  const isSSR = typeof window === 'undefined';
+  console.log('isSSR: ', isSSR);
 
   // シャッフル関数
   const shuffleArray = <T,>(array: T[]): T[] => {
@@ -41,6 +44,7 @@ export default function HomeScreen() {
 
   // 画面の横幅を取得
   const { width: screenWidth } = useWindowDimensions();
+  console.log('screenWidth: ', screenWidth);
   // カードの横幅を計算
   const cardWidth = screenWidth * 0.9;
   // 画面端からのカードのはみ出し量(30px)
