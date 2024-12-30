@@ -15,9 +15,6 @@ interface Phrase {
 export default function HomeScreen() {
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
   const [phrases, setPhrases] = useState<Phrase[]>([]);
-  // SSR判定
-  const isSSR = typeof window === 'undefined';
-  console.log('isSSR: ', isSSR);
 
   // シャッフル関数
   const shuffleArray = <T,>(array: T[]): T[] => {
@@ -47,13 +44,16 @@ export default function HomeScreen() {
   console.log('screenWidth: ', screenWidth);
   // カードの横幅を計算
   const cardWidth = screenWidth * 0.9;
+  console.log('cardWidth: ', cardWidth);
   // 画面端からのカードのはみ出し量(30px)
   const peekWidth = 30;
 
   // カードの位置を初期化
   const prevSlideAnim = useRef(new Animated.Value(-cardWidth + peekWidth)).current;
+  console.log('prevSlideAnim: ', prevSlideAnim);
   const currentSlideAnim = useRef(new Animated.Value(0)).current;
   const nextSlideAnim = useRef(new Animated.Value(cardWidth - peekWidth)).current;
+  console.log('nextSlideAnim: ', nextSlideAnim);
 
   // 初期位置の設定
   useEffect(() => {
