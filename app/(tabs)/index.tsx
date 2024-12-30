@@ -41,22 +41,20 @@ export default function HomeScreen() {
 
   // 画面の横幅を取得
   const { width: screenWidth } = useWindowDimensions();
-  // カードの横幅を計算 screenWidthが0 or undefinedの場合は0を返す
-  const cardWidth = screenWidth > 0 ? screenWidth * 0.9 : 0;
+  // Webだと初期描画時にscreenWidthが0になることがあるので、
+  // その場合はnullを返して描画をスキップする
+  if (screenWidth === 0) {
+    return null
+  }
+  // カードの横幅を計算
+  const cardWidth = screenWidth * 0.9;
   // 画面端からのカードのはみ出し量(30px)
   const peekWidth = 30;
 
   // カードの位置を初期化
   const prevSlideAnim = useRef(new Animated.Value(-cardWidth + peekWidth)).current;
-  console.log('prevSlideAnim: ', prevSlideAnim);
   const currentSlideAnim = useRef(new Animated.Value(0)).current;
   const nextSlideAnim = useRef(new Animated.Value(cardWidth - peekWidth)).current;
-  console.log('nextSlideAnim: ', nextSlideAnim);
-
-  // cardWidth が 0 のまま（初期値）なら描画をスキップ
-  if (cardWidth === 0) {
-    return null
-  }
 
   // 初期位置の設定
   useEffect(() => {
