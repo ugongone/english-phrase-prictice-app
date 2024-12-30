@@ -1,4 +1,4 @@
-import { StyleSheet, Animated, Dimensions } from 'react-native';
+import { StyleSheet, Animated, Dimensions, useWindowDimensions } from 'react-native';
 import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { RandomPhrase } from '@/components/RandomPhrase';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -40,7 +40,7 @@ export default function HomeScreen() {
   }, []);
 
   // 画面の横幅を取得
-  const screenWidth = Dimensions.get('window').width;
+  const { width: screenWidth } = useWindowDimensions();
   // カードの横幅を計算
   const cardWidth = screenWidth * 0.9;
   // 画面端からのカードのはみ出し量(30px)
@@ -51,12 +51,14 @@ export default function HomeScreen() {
   const currentSlideAnim = useRef(new Animated.Value(0)).current;
   const nextSlideAnim = useRef(new Animated.Value(cardWidth - peekWidth)).current;
 
-  // 初期位置を確実に設定するために、cardWidthとpeekWidthに値が入ってから各位置を更新
-  useLayoutEffect(() => {
-    prevSlideAnim.setValue(-cardWidth + peekWidth);
-    currentSlideAnim.setValue(0);
-    nextSlideAnim.setValue(cardWidth - peekWidth);
-  }, [cardWidth, peekWidth]);
+  // 初期位置の設定
+  useEffect(() => {
+    if (cardWidth > 0) {
+      prevSlideAnim.setValue(-cardWidth + peekWidth);
+      currentSlideAnim.setValue(0);
+      nextSlideAnim.setValue(cardWidth - peekWidth);
+    }
+  }, [cardWidth]);
 
   const swipeGesture = Gesture.Pan()
     .onEnd((event) => {
