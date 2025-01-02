@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { RandomPhrase } from '@/components/RandomPhrase';
 import { ThemedView } from '@/components/ThemedView';
 import { GestureDetector, Gesture, GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 interface Phrase {
   id: string;
@@ -74,7 +74,8 @@ export default function HomeScreen() {
         translateXMiddle.value = withTiming(initialCardPositionLeft, { duration: 300 });
         translateXRight.value = withTiming(initialCardPositionMiddle, { duration: 300 }, () => {
           // 次のカードを表示するために、カードのインデックスを更新
-          setCurrentPhraseIndex(prev => prev + 1);
+          // 状態更新はJSスレッドで行う必要があるため、runOnJSを使用
+          runOnJS(setCurrentPhraseIndex)(prev => prev + 1);
           translateXLeft.value = initialCardPositionLeft;
           translateXMiddle.value = initialCardPositionMiddle;
           translateXRight.value = initialCardPositionRight;
