@@ -1,9 +1,9 @@
-import { StyleSheet, Animated, useWindowDimensions} from 'react-native';
-import { useState, useRef, useEffect } from 'react';
+import { StyleSheet, useWindowDimensions } from 'react-native';
+import { useState, useEffect } from 'react';
 import { RandomPhrase } from '@/components/RandomPhrase';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedView } from '@/components/ThemedView';
-import { GestureDetector, Gesture } from 'react-native-gesture-handler';
+import { GestureDetector, Gesture, GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 interface Phrase {
   id: string;
@@ -47,100 +47,93 @@ export default function HomeScreen() {
     return null
   }
   // カードの横幅を計算
-  const cardWidth = screenWidth * 0.9;
-  // 画面端からのカードのはみ出し量(30px)
-  const peekWidth = 30;
+  const cardWidth = screenWidth * 0.8;
+  // 画面端からのカードのはみ出し幅(px)
+  const peekWidth = 10;
 
-  // カードの位置を初期化
-  const prevSlideAnim = useRef(new Animated.Value(-cardWidth + peekWidth)).current;
-  const currentSlideAnim = useRef(new Animated.Value(0)).current;
-  const nextSlideAnim = useRef(new Animated.Value(cardWidth - peekWidth)).current;
+  // 各カードの初期位置
+  const initialCardPositionLeft = -screenWidth/2 -cardWidth/2 + peekWidth;
+  const initialCardPositionMiddle = 0;
+  const initialCardPositionRight = screenWidth/2 + cardWidth/2 - peekWidth;
 
-  // 初期位置の設定
-  useEffect(() => {
-    if (cardWidth > 0) {
-      prevSlideAnim.setValue(-cardWidth + peekWidth);
-      currentSlideAnim.setValue(0);
-      nextSlideAnim.setValue(cardWidth - peekWidth);
-    }
-  }, [cardWidth]);
+  const translateXLeft = useSharedValue(initialCardPositionLeft);
+  const translateXMiddle = useSharedValue(initialCardPositionMiddle);
+  const translateXRight = useSharedValue(initialCardPositionRight);
 
   const swipeGesture = Gesture.Pan()
+    .onUpdate((event) => {
+      // 初期描画場所から、実際のスワイプ距離に合わせて全てのカードを移動
+      translateXLeft.value = initialCardPositionLeft + event.translationX;
+      translateXMiddle.value = initialCardPositionMiddle + event.translationX;
+      translateXRight.value = initialCardPositionRight + event.translationX;
+    })
     .onEnd((event) => {
-      if (event.velocityX < -50) {
-        Animated.parallel([
-          // 前のカードはさらに左に移動して画面外に
-          Animated.timing(prevSlideAnim, {
-            toValue: -cardWidth * 2,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          // 現在のカードは左に移動
-          Animated.timing(currentSlideAnim, {
-            toValue: -cardWidth + peekWidth,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          // 次のカードは中央に移動
-          Animated.timing(nextSlideAnim, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          })
-        ]).start(() => {
+      // スワイプ距離が左に50pxより大きい場合は、カードを左に移動
+      if (event.translationX < -50) {
+        translateXLeft.value = withTiming(initialCardPositionLeft * 2, { duration: 300 });
+        translateXMiddle.value = withTiming(initialCardPositionLeft, { duration: 300 });
+        translateXRight.value = withTiming(initialCardPositionMiddle, { duration: 300 }, () => {
+          // 次のカードを表示するために、カードのインデックスを更新
           setCurrentPhraseIndex(prev => prev + 1);
-          prevSlideAnim.setValue(-cardWidth + peekWidth);
-          currentSlideAnim.setValue(0);
-          nextSlideAnim.setValue(cardWidth - peekWidth);
+          translateXLeft.value = initialCardPositionLeft;
+          translateXMiddle.value = initialCardPositionMiddle;
+          translateXRight.value = initialCardPositionRight;
         });
+      } else {
+        // スワイプ距離が左に50pxより小さい場合は、カードを初期位置に戻す
+        translateXLeft.value = withTiming(initialCardPositionLeft, { duration: 300 });
+        translateXMiddle.value = withTiming(initialCardPositionMiddle, { duration: 300 });
+        translateXRight.value = withTiming(initialCardPositionRight, { duration: 300 });
       }
     });
+  const animatedStyleLeft = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateXLeft.value }]
+    };
+  });
+
+  const animatedStyleMiddle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateXMiddle.value }]
+    };
+  });
+
+  const animatedStyleRight = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateXRight.value }]
+    };
+  });
 
   return (
-    <GestureDetector gesture={swipeGesture}>
-      <ThemedView
-        style={styles.pressable}
-        lightColor="#F5F5F5"
-        darkColor="#F5F5F5">
-        <ParallaxScrollView
-          headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-          headerImage={<ThemedView />}>
-          <ThemedView style={styles.container}
-            lightColor="#F5F5F5"
-            darkColor="#F5F5F5">
-            <Animated.View style={[
-              styles.cardContainer,
-              {
-                position: 'absolute',
-                transform: [{ translateX: prevSlideAnim }]
-              }
-            ]}>
-              <RandomPhrase phraseIndex={currentPhraseIndex} phrases={phrases} />
-            </Animated.View>
+    <GestureHandlerRootView>
+      <GestureDetector gesture={swipeGesture}>
+        <ThemedView style={styles.container}
+          lightColor="#F5F5F5"
+          darkColor="#F5F5F5">
 
-            <Animated.View style={[
-              styles.cardContainer,
-              {
-                position: 'absolute',
-                transform: [{ translateX: currentSlideAnim }]
-              }
-            ]}>
-              <RandomPhrase phraseIndex={currentPhraseIndex} phrases={phrases} />
-            </Animated.View>
+          <Animated.View style={[
+            styles.cardContainer,
+            animatedStyleLeft,
+          ]}>
+            <RandomPhrase phraseIndex={currentPhraseIndex} phrases={phrases} />
+          </Animated.View>
 
-            <Animated.View style={[
-              styles.cardContainer,
-              {
-                position: 'absolute',
-                transform: [{ translateX: nextSlideAnim }]
-              }
-            ]}>
-              <RandomPhrase phraseIndex={currentPhraseIndex + 1} phrases={phrases} />
-            </Animated.View>
-          </ThemedView>
-        </ParallaxScrollView>
-      </ThemedView>
-    </GestureDetector>
+          <Animated.View style={[
+            styles.cardContainer,
+            animatedStyleMiddle,
+          ]}>
+            <RandomPhrase phraseIndex={currentPhraseIndex + 1} phrases={phrases} />
+          </Animated.View>
+
+          <Animated.View style={[
+            styles.cardContainer,
+            animatedStyleRight,
+          ]}>
+            <RandomPhrase phraseIndex={currentPhraseIndex + 2} phrases={phrases} />
+          </Animated.View>
+        </ThemedView>
+      </GestureDetector>
+    </GestureHandlerRootView>
   );
 }
 
@@ -156,9 +149,9 @@ const styles = StyleSheet.create({
     minHeight: 400,
   },
   cardContainer: {
-    width: '90%',
+    width: '80%',
     maxWidth: 400,
     alignItems: 'center',
-    transform: [{ translateY: -180 }],
+    position: 'absolute',
   }
 });
