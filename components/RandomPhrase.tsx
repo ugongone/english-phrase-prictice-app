@@ -14,22 +14,27 @@ interface Phrase {
 interface RandomPhraseProps {
   phraseIndex: number;
   phrases: Phrase[];
+  // このコンポーネント内でshowEnglishを持たない理由：
+  // このコンポーネント内で切り替えようとすると、カードの切替時に一瞬だけ切替前のshowEnglishを引き継いでしまうため
+  showEnglish: boolean;
+  // 英語の表示/非表示を切り替えるコールバック
+  onToggleEnglish: (phraseIndex: number) => void;
 }
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-export function RandomPhrase({ phraseIndex, phrases }: RandomPhraseProps) {
-  const [showEnglish, setShowEnglish] = useState(false);
+export function RandomPhrase({
+  phraseIndex,
+  phrases,
+  showEnglish,
+  onToggleEnglish,
+}: RandomPhraseProps) {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
 
   const phrase =
     phrases.length > 0
       ? phrases[phraseIndex % phrases.length]
       : { id: "", english: "", japanese: "", date: "" };
-
-  useLayoutEffect(() => {
-    setShowEnglish(false);
-  }, [phraseIndex]);
 
   async function playSound() {
     try {
@@ -97,7 +102,7 @@ export function RandomPhrase({ phraseIndex, phrases }: RandomPhraseProps) {
           <Pressable
             onPress={(e) => {
               e.stopPropagation();
-              setShowEnglish(!showEnglish);
+              onToggleEnglish(phraseIndex);
             }}
             style={({ pressed }) => [
               styles.button,

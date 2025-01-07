@@ -24,6 +24,9 @@ interface Phrase {
 export default function HomeScreen() {
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
   const [phrases, setPhrases] = useState<Phrase[]>([]);
+  const [showEnglishMap, setShowEnglishMap] = useState<Record<number, boolean>>(
+    {}
+  );
 
   // シャッフル関数
   const shuffleArray = <T,>(array: T[]): T[] => {
@@ -69,6 +72,7 @@ export default function HomeScreen() {
   const translateXMiddle = useSharedValue(initialCardPositionMiddle);
   const translateXRight = useSharedValue(initialCardPositionRight);
 
+  // スワイプ処理
   const swipeGesture = Gesture.Pan()
     .onUpdate((event) => {
       // 初期描画場所から、実際のスワイプ距離に合わせて全てのカードを移動
@@ -91,7 +95,16 @@ export default function HomeScreen() {
           () => {
             // 次のカードを表示するために、カードのインデックスを更新
             // 状態更新はJSスレッドで行う必要があるため、runOnJSを使用
-            runOnJS(setCurrentPhraseIndex)((prev) => prev + 1);
+            runOnJS(() => {
+              // カードの切替前に現在のカードの英語を非表示に
+              setShowEnglishMap((prev) => ({
+                ...prev,
+                [currentPhraseIndex]: false,
+              }));
+              setCurrentPhraseIndex((prev) => prev + 1);
+            })();
+
+            // カードの位置を初期化
             translateXLeft.value = initialCardPositionLeft;
             translateXMiddle.value = initialCardPositionMiddle;
             translateXRight.value = initialCardPositionRight;
@@ -110,6 +123,7 @@ export default function HomeScreen() {
         });
       }
     });
+
   const animatedStyleLeft = useAnimatedStyle(() => {
     return {
       transform: [{ translateX: translateXLeft.value }],
@@ -128,6 +142,14 @@ export default function HomeScreen() {
     };
   });
 
+  // 子コンポーネント内で利用
+  const onToggleEnglish = (phraseIndex: number) => {
+    setShowEnglishMap((prev) => ({
+      ...prev,
+      [phraseIndex]: !prev[phraseIndex],
+    }));
+  };
+
   return (
     <GestureHandlerRootView>
       <GestureDetector gesture={swipeGesture}>
@@ -141,6 +163,8 @@ export default function HomeScreen() {
               key={currentPhraseIndex}
               phraseIndex={currentPhraseIndex}
               phrases={phrases}
+              showEnglish={!!showEnglishMap[currentPhraseIndex]}
+              onToggleEnglish={() => onToggleEnglish(currentPhraseIndex)}
             />
           </Animated.View>
 
@@ -149,6 +173,8 @@ export default function HomeScreen() {
               key={currentPhraseIndex + 1}
               phraseIndex={currentPhraseIndex + 1}
               phrases={phrases}
+              showEnglish={!!showEnglishMap[currentPhraseIndex + 1]}
+              onToggleEnglish={() => onToggleEnglish(currentPhraseIndex + 1)}
             />
           </Animated.View>
 
@@ -157,6 +183,8 @@ export default function HomeScreen() {
               key={currentPhraseIndex + 2}
               phraseIndex={currentPhraseIndex + 2}
               phrases={phrases}
+              showEnglish={!!showEnglishMap[currentPhraseIndex + 2]}
+              onToggleEnglish={() => onToggleEnglish(currentPhraseIndex + 2)}
             />
           </Animated.View>
         </ThemedView>
