@@ -5,10 +5,14 @@ import { ThemedView } from "./ThemedView";
 import { Audio } from "expo-av";
 
 interface Phrase {
-  id: string;
-  english: string;
-  japanese: string;
-  date: string;
+  pageId: string;
+  properties: {
+    id: string;
+    english: string;
+    japanese: string;
+    date: string;
+    status: string;
+  };
 }
 
 interface RandomPhraseProps {
@@ -34,7 +38,16 @@ export function RandomPhrase({
   const phrase =
     phrases.length > 0
       ? phrases[phraseIndex % phrases.length]
-      : { id: "", english: "", japanese: "", date: "" };
+      : {
+          pageId: "",
+          properties: {
+            id: "",
+            english: "",
+            japanese: "",
+            date: "",
+            status: "",
+          },
+        };
 
   async function playSound() {
     try {
@@ -48,7 +61,7 @@ export function RandomPhrase({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          text: phrase.english,
+          text: phrase.properties.english,
         }),
       });
       const data = await response.json();
@@ -78,13 +91,13 @@ export function RandomPhrase({
         <ThemedView style={styles.contentContainer}>
           <ThemedView style={styles.phraseContainer}>
             <ThemedText type="title" style={styles.japanese}>
-              {phrase.japanese}
+              {phrase.properties.japanese}
             </ThemedText>
             <ThemedView style={styles.englishContainer}>
               {showEnglish ? (
                 <ThemedView style={styles.englishWrapper}>
                   <ThemedText type="title" style={styles.english}>
-                    {phrase.english}
+                    {phrase.properties.english}
                   </ThemedText>
                   <Pressable onPress={playSound}>
                     <Image

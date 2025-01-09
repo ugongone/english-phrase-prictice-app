@@ -15,10 +15,14 @@ import Animated, {
 } from "react-native-reanimated";
 
 interface Phrase {
-  id: string;
-  english: string;
-  japanese: string;
-  date: string;
+  pageId: string;
+  properties: {
+    id: string;
+    japanese: string;
+    english: string;
+    date: string;
+    status: string;
+  };
 }
 
 export default function HomeScreen() {
