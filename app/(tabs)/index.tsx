@@ -165,7 +165,7 @@ export default function HomeScreen() {
         },
         body: JSON.stringify({
           id: pageId,
-          status: "Archived",
+          status: "Completed",
         }),
       });
 
@@ -175,6 +175,12 @@ export default function HomeScreen() {
 
       // アーカイブ成功後、該当のフレーズを配列から削除
       setPhrases(phrases.filter((phrase) => phrase.pageId !== pageId));
+      setShowEnglishMap((prev) => ({
+        ...prev,
+        [currentPhraseIndex]: false,
+        [currentPhraseIndex + 1]: false,
+        [currentPhraseIndex + 2]: false,
+      }));
     } catch (error) {
       console.error("Error archiving phrase:", error);
     }
