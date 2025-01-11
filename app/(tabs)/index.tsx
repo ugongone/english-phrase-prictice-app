@@ -77,6 +77,15 @@ export default function HomeScreen() {
   const translateXMiddle = useSharedValue(initialCardPositionMiddle);
   const translateXRight = useSharedValue(initialCardPositionRight);
 
+  function updateState() {
+    // カードの切替前に現在のカードの英語を非表示に
+    setShowEnglishMap((prev) => ({
+      ...prev,
+      [currentPhraseIndex]: false,
+    }));
+    setCurrentPhraseIndex((prev) => prev + 1);
+  }
+
   // スワイプ処理
   const swipeGesture = Gesture.Pan()
     .onUpdate((event) => {
@@ -100,14 +109,7 @@ export default function HomeScreen() {
           () => {
             // 次のカードを表示するために、カードのインデックスを更新
             // 状態更新はJSスレッドで行う必要があるため、runOnJSを使用
-            runOnJS(() => {
-              // カードの切替前に現在のカードの英語を非表示に
-              setShowEnglishMap((prev) => ({
-                ...prev,
-                [currentPhraseIndex]: false,
-              }));
-              setCurrentPhraseIndex((prev) => prev + 1);
-            })();
+            runOnJS(updateState)();
 
             // カードの位置を初期化
             translateXLeft.value = initialCardPositionLeft;
