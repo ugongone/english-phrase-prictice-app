@@ -34,6 +34,7 @@ export function RandomPhrase({
   onToggleEnglish,
 }: RandomPhraseProps) {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const phrase =
     phrases.length > 0
@@ -51,6 +52,9 @@ export function RandomPhrase({
 
   async function playSound() {
     try {
+      // ボタンを押した瞬間に「再生中」扱いにして、二重押下を防ぐ
+      setIsPlaying(true);
+
       if (sound) {
         await sound.unloadAsync();
       }
@@ -70,9 +74,16 @@ export function RandomPhrase({
         { shouldPlay: true }
       );
       setSound(newSound);
-      await newSound.playAsync();
+      newSound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          setIsPlaying(false);
+          // 多重再生を防ぐために再生終了後にサウンドをクリーンアップ
+          newSound.setOnPlaybackStatusUpdate(() => {});
+        }
+      });
     } catch (error) {
       console.error("Error playing sound:", error);
+      setIsPlaying(false);
     }
   }
 
@@ -99,7 +110,14 @@ export function RandomPhrase({
                   <ThemedText type="title" style={styles.english}>
                     {phrase.properties.english}
                   </ThemedText>
-                  <Pressable onPress={playSound}>
+                  <Pressable
+                    onPress={playSound}
+                    disabled={isPlaying}
+                    style={[
+                      styles.speakerButton,
+                      isPlaying && styles.speakerButtonDisabled,
+                    ]}
+                  >
                     <Image
                       source={require("../assets/images/speaker-filled-audio-tool.png")}
                       style={styles.logo}
@@ -226,5 +244,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#FFF",
+  },
+  speakerButton: {
+    opacity: 1,
+  },
+  speakerButtonDisabled: {
+    opacity: 0.5,
   },
 });
