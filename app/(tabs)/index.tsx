@@ -1,4 +1,4 @@
-import { StyleSheet, useWindowDimensions } from "react-native";
+import { Pressable, StyleSheet, useWindowDimensions } from "react-native";
 import { useState, useEffect } from "react";
 import { RandomPhrase } from "@/components/RandomPhrase";
 import { ThemedView } from "@/components/ThemedView";
@@ -13,6 +13,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { ThemedText } from "@/components/ThemedText";
 
 interface Phrase {
   pageId: string;
@@ -154,6 +155,31 @@ export default function HomeScreen() {
     }));
   };
 
+  const onArchive = async (pageId: string) => {
+    try {
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/api/notion/updateData`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: pageId,
+          status: "Archived",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("アーカイブに失敗しました");
+      }
+
+      // アーカイブ成功後、該当のフレーズを配列から削除
+      setPhrases(phrases.filter((phrase) => phrase.pageId !== pageId));
+    } catch (error) {
+      console.error("Error archiving phrase:", error);
+    }
+  };
+
   return (
     <GestureHandlerRootView>
       <GestureDetector gesture={swipeGesture}>
@@ -191,6 +217,16 @@ export default function HomeScreen() {
               onToggleEnglish={() => onToggleEnglish(currentPhraseIndex + 2)}
             />
           </Animated.View>
+
+          <Pressable
+            style={styles.archiveButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              onArchive(phrases[currentPhraseIndex].pageId);
+            }}
+          >
+            <ThemedText style={styles.archiveButtonText}>アーカイブ</ThemedText>
+          </Pressable>
         </ThemedView>
       </GestureDetector>
     </GestureHandlerRootView>
@@ -213,5 +249,26 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     alignItems: "center",
     position: "absolute",
+  },
+  archiveButton: {
+    position: "absolute",
+    bottom: 120, // 下からの距離
+    backgroundColor: "#DC9393",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    elevation: 2, // Androidのシャドウ
+    shadowColor: "#000", // iOSのシャドウ
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  archiveButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFF",
   },
 });

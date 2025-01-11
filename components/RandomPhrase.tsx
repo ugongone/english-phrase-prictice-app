@@ -122,7 +122,7 @@ export function RandomPhrase({
               pressed && styles.buttonPressed,
             ]}
           >
-            <ThemedText>
+            <ThemedText style={styles.buttonText}>
               {showEnglish ? "英語を非表示" : "英語を表示"}
             </ThemedText>
           </Pressable>
@@ -210,8 +210,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     alignSelf: "center",
     minWidth: 120,
+    elevation: 2, // Androidのシャドウ
+    shadowColor: "#000", // iOSのシャドウ
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   buttonPressed: {
     opacity: 0.7,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFF",
   },
 });
