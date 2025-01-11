@@ -250,9 +250,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     position: "absolute",
   },
+  // カードの高さ 360px ＋ 20px(カード下端からの余白) = 380px
+  // 画面中央が "top: '50%'" なので、カード半分(180px) + 20px = 200px を下にずらす
   archiveButton: {
     position: "absolute",
-    bottom: 120, // 下からの距離
+    top: "50%", // 画面中央を基準に
+    marginTop: 200, // カード半分(180px) + 20px = 200px 分下げる
     backgroundColor: "#DC9393",
     paddingVertical: 12,
     paddingHorizontal: 24,
