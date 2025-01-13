@@ -15,11 +15,9 @@ interface Phrase {
   };
 }
 
-interface RandomPhraseProps {
+interface PhraseCardProps {
   phraseIndex: number;
   phrases: Phrase[];
-  // このコンポーネント内でshowEnglishを持たない理由：
-  // このコンポーネント内で切り替えようとすると、カードの切替時に一瞬だけ切替前のshowEnglishを引き継いでしまうため
   showEnglish: boolean;
   // 英語の表示/非表示を切り替えるコールバック
   onToggleEnglish: (phraseIndex: number) => void;
@@ -27,12 +25,12 @@ interface RandomPhraseProps {
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-export function RandomPhrase({
+export function PhraseCard({
   phraseIndex,
   phrases,
   showEnglish,
   onToggleEnglish,
-}: RandomPhraseProps) {
+}: PhraseCardProps) {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 

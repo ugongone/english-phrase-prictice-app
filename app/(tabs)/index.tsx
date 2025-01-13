@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, useWindowDimensions } from "react-native";
 import { useState, useEffect } from "react";
-import { RandomPhrase } from "@/components/RandomPhrase";
+import { PhraseCard } from "@/components/PhraseCard";
 import { ThemedView } from "@/components/ThemedView";
 import {
   GestureDetector,
@@ -172,6 +172,8 @@ export default function HomeScreen() {
 
       // アーカイブ成功後、該当のフレーズを配列から削除
       setPhrases(phrases.filter((phrase) => phrase.pageId !== pageId));
+      // アーカイブ後は次のカードの英語が表示されてしまうので、英語を非表示にする
+      setShowEnglish(false);
     } catch (error) {
       console.error("Error archiving phrase:", error);
     }
@@ -186,7 +188,7 @@ export default function HomeScreen() {
           darkColor="#F5F5F5"
         >
           <Animated.View style={[styles.cardContainer, animatedStyleLeft]}>
-            <RandomPhrase
+            <PhraseCard
               key={currentPhraseIndex}
               phraseIndex={currentPhraseIndex}
               phrases={phrases}
@@ -196,7 +198,7 @@ export default function HomeScreen() {
           </Animated.View>
 
           <Animated.View style={[styles.cardContainer, animatedStyleMiddle]}>
-            <RandomPhrase
+            <PhraseCard
               key={currentPhraseIndex + 1}
               phraseIndex={currentPhraseIndex + 1}
               phrases={phrases}
@@ -206,7 +208,7 @@ export default function HomeScreen() {
           </Animated.View>
 
           <Animated.View style={[styles.cardContainer, animatedStyleRight]}>
-            <RandomPhrase
+            <PhraseCard
               key={currentPhraseIndex + 2}
               phraseIndex={currentPhraseIndex + 2}
               phrases={phrases}
