@@ -29,9 +29,7 @@ interface Phrase {
 export default function HomeScreen() {
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
   const [phrases, setPhrases] = useState<Phrase[]>([]);
-  const [showEnglishMap, setShowEnglishMap] = useState<Record<number, boolean>>(
-    {}
-  );
+  const [showEnglish, setShowEnglish] = useState(false);
 
   // シャッフル関数
   const shuffleArray = <T,>(array: T[]): T[] => {
@@ -85,10 +83,7 @@ export default function HomeScreen() {
 
   function updateState() {
     // カードの切替前に現在のカードの英語を非表示に
-    setShowEnglishMap((prev) => ({
-      ...prev,
-      [currentPhraseIndex]: false,
-    }));
+    setShowEnglish(false);
     setCurrentPhraseIndex((prev) => prev + 1);
   }
 
@@ -153,11 +148,8 @@ export default function HomeScreen() {
   });
 
   // 子コンポーネント内で利用
-  const onToggleEnglish = (phraseIndex: number) => {
-    setShowEnglishMap((prev) => ({
-      ...prev,
-      [phraseIndex]: !prev[phraseIndex],
-    }));
+  const onToggleEnglish = () => {
+    setShowEnglish((prev) => !prev);
   };
 
   const onArchive = async (pageId: string) => {
@@ -180,12 +172,6 @@ export default function HomeScreen() {
 
       // アーカイブ成功後、該当のフレーズを配列から削除
       setPhrases(phrases.filter((phrase) => phrase.pageId !== pageId));
-      setShowEnglishMap((prev) => ({
-        ...prev,
-        [currentPhraseIndex]: false,
-        [currentPhraseIndex + 1]: false,
-        [currentPhraseIndex + 2]: false,
-      }));
     } catch (error) {
       console.error("Error archiving phrase:", error);
     }
@@ -204,8 +190,8 @@ export default function HomeScreen() {
               key={currentPhraseIndex}
               phraseIndex={currentPhraseIndex}
               phrases={phrases}
-              showEnglish={!!showEnglishMap[currentPhraseIndex]}
-              onToggleEnglish={() => onToggleEnglish(currentPhraseIndex)}
+              showEnglish={false}
+              onToggleEnglish={onToggleEnglish}
             />
           </Animated.View>
 
@@ -214,8 +200,8 @@ export default function HomeScreen() {
               key={currentPhraseIndex + 1}
               phraseIndex={currentPhraseIndex + 1}
               phrases={phrases}
-              showEnglish={!!showEnglishMap[currentPhraseIndex + 1]}
-              onToggleEnglish={() => onToggleEnglish(currentPhraseIndex + 1)}
+              showEnglish={showEnglish}
+              onToggleEnglish={onToggleEnglish}
             />
           </Animated.View>
 
@@ -224,8 +210,8 @@ export default function HomeScreen() {
               key={currentPhraseIndex + 2}
               phraseIndex={currentPhraseIndex + 2}
               phrases={phrases}
-              showEnglish={!!showEnglishMap[currentPhraseIndex + 2]}
-              onToggleEnglish={() => onToggleEnglish(currentPhraseIndex + 2)}
+              showEnglish={false}
+              onToggleEnglish={onToggleEnglish}
             />
           </Animated.View>
 
