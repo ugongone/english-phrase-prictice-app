@@ -56,6 +56,12 @@ export default function HomeScreen() {
       .catch((error) => console.error("Error fetching phrases:", error));
   }, []);
 
+  useEffect(() => {
+    translateXLeft.value = initialCardPositionLeft;
+    translateXMiddle.value = initialCardPositionMiddle;
+    translateXRight.value = initialCardPositionRight;
+  }, [currentPhraseIndex]);
+
   // 画面の横幅を取得
   const { width: screenWidth } = useWindowDimensions();
   // Webだと初期描画時にscreenWidthが0になることがあるので、
@@ -106,19 +112,16 @@ export default function HomeScreen() {
         translateXRight.value = withTiming(
           initialCardPositionMiddle,
           { duration: 300 },
-          () => {
-            // 次のカードを表示するために、カードのインデックスを更新
-            // 状態更新はJSスレッドで行う必要があるため、runOnJSを使用
-            runOnJS(updateState)();
-
-            // カードの位置を初期化
-            translateXLeft.value = initialCardPositionLeft;
-            translateXMiddle.value = initialCardPositionMiddle;
-            translateXRight.value = initialCardPositionRight;
+          (isFinished) => {
+            if (isFinished) {
+              // 次のカードを表示するために、カードのインデックスを更新
+              // 状態更新はJSスレッドで行う必要があるため、runOnJSを使用
+              runOnJS(updateState)();
+            }
           }
         );
       } else {
-        // スワイプ距離が左に50pxより小さい場合は、カードを初期位置に戻す
+        // スワイプ距離が左に50px以下の場合は、カードを初期位置に戻す
         translateXLeft.value = withTiming(initialCardPositionLeft, {
           duration: 300,
         });
